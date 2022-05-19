@@ -1,0 +1,43 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    container_name: db-oscars
+    environment:
+      MYSQL_ROOT_PASSWORD: "mysql_pwd-demo@1."
+      MYSQL_DATABASE: "oscars_db"
+      MYSQL_USER: "demo_user"
+      MYSQL_PASSWORD: "mysql_pwd-demo@2."
+    ports:
+      - 3306:3306
+    volumes:
+      - myapp:/src/data
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    ports:
+      - 8080:80
+    depends_on: 
+      - db
+
+  firefox:
+    image: selenium/standalone-firefox:latest
+    hostname: firefox
+    ports:
+      - "4444:4444"
+    depends_on:
+      - db
+
+  scraper:
+      build: .
+      depends_on:
+        - db
+      links:
+        - db
+        - firefox
+
+volumes:
+    myapp:
